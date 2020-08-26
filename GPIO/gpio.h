@@ -12,29 +12,32 @@
 #ifndef GPIO_H_
 #define GPIO_H_
 
-
-
-/*******************************************************************************
- *                          GPIO Common Macros
- ******************************************************************************/
-
-#define ACCESS_REG(BASE,OFFSET) (*((volatile uint32_t*)(BASE+OFFSET)))
+#include "std_types.h"
+#include "common_macros.h"
 
 
 /*******************************************************************************
  *                   GPIO Registers and Ports Definitions
  ******************************************************************************/
 
-                                /* Ports Base Address */
+                                /* Ports Base Addresses */
 #define PORTA     0x40004000
 #define PORTB     0x40005000
 #define PORTC     0x40006000
 #define PORTD     0x40007000
 #define PORTE     0x40024000
 #define PORTF     0x40025000
+#define NVIC      0xE000E000
 
 
                                 /* Registers offset */
+
+
+/* GPIOLOCK: Writing "0x4C4F434B" to unlock GPIOCR register */
+#define GPIOLOCK    0x520
+
+/* GPIOCR: Commit Register that allows configuring the GPIO Pins when written with '0x01' */
+#define GPIOCR      0x524
 
 /* GPIODATA: Read/Write Register */
 #define GPIODATA    0x3FC
@@ -75,47 +78,37 @@
  */
 #define GPIOODR     0x50C
 
+/* GPIOIM: GPIO Interrupt Mask
+*  0 := Interrupt Disabled
+*  1 := Interrupt Enabled
+*/
+#define GPIOIM      0x410
 
-/* Registers Memory Mapped Access */
+/* ISER_0: GPIO IRQs NVIC Enable */
+#define ISER_0      0x100
 
+/* GPIOIS: GPIO Interrupt Trigger(1)
+*  0 := Edge Sensitive
+*  1 := Level Sensitive
+*/
+#define GPIOIS      0x404
 
-/* RCGCGPIO */
-#define RCGCGPIO     (*((volatile uint32_t*)(0x400FE000+0x608)))
+/* GPIOIEV: GPIO Interrupt Trigger(2)
+*  0 := Falling/Low ~ Edge/Level
+*  1 := Rising/High ~ Edge/Level
+*/
+#define GPIOIEV     0x40C
 
-/* GPIODATA */
-#define GPIODATAA    (*((volatile uint32_t*)(PORTA+GPIODATA)))
-#define GPIODATAB    (*((volatile uint32_t*)(PORTB+GPIODATA)))
-#define GPIODATAC    (*((volatile uint32_t*)(PORTC+GPIODATA)))
-#define GPIODATAD    (*((volatile uint32_t*)(PORTD+GPIODATA)))
-#define GPIODATAE    (*((volatile uint32_t*)(PORTE+GPIODATA)))
-#define GPIODATAF    (*((volatile uint32_t*)(PORTF+GPIODATA)))
+/* GPIOIBE: GPIO Interrupt Trigger(2)
+*  0 := Both Rising/Falling OFF
+*  1 := Both Rising/Falling ON
+*/
+#define GPIOIBE     0x408
 
-
-/* GPIODIR */
-#define GPIODIRA    (*((volatile uint32_t*)(PORTA+GPIODIR)))
-#define GPIODIRB    (*((volatile uint32_t*)(PORTB+GPIODIR)))
-#define GPIODIRC    (*((volatile uint32_t*)(PORTC+GPIODIR)))
-#define GPIODIRD    (*((volatile uint32_t*)(PORTD+GPIODIR)))
-#define GPIODIRE    (*((volatile uint32_t*)(PORTE+GPIODIR)))
-#define GPIODIRF    (*((volatile uint32_t*)(PORTF+GPIODIR)))
-
-/* GPIODEN */
-#define GPIODENA    (*((volatile uint32_t*)(PORTA+GPIODENA)))
-#define GPIODENB    (*((volatile uint32_t*)(PORTB+GPIODENB)))
-#define GPIODENC    (*((volatile uint32_t*)(PORTC+GPIODENC)))
-#define GPIODEND    (*((volatile uint32_t*)(PORTD+GPIODEND)))
-#define GPIODENE    (*((volatile uint32_t*)(PORTE+GPIODENE)))
-#define GPIODENF    (*((volatile uint32_t*)(PORTF+GPIODENF)))
-
-/* GPIOUR */
-#define GPIOURA    (*((volatile uint32_t*)(PORTA+GPIOURA)))
-#define GPIOURB    (*((volatile uint32_t*)(PORTB+GPIOURB)))
-#define GPIOURC    (*((volatile uint32_t*)(PORTC+GPIOURC)))
-#define GPIOURD    (*((volatile uint32_t*)(PORTD+GPIOURD)))
-#define GPIOURE    (*((volatile uint32_t*)(PORTE+GPIOURE)))
-#define GPIOURF    (*((volatile uint32_t*)(PORTF+GPIOURF)))
-
-
+/* GPIOICR: Interrupt Clear Register
+ * interrupt is cleared by writing '1' to the corresponding external pin
+ */
+#define GPIOICR     0x41C
 
                     /* PIN Definitions */
 #define PIN_0       0
@@ -176,6 +169,27 @@ typedef enum{
 }PIN_BEHAVIOUR;
 
 
+/******************************************************************************
+ * Name: PIN_INT
+ * Description: Enumerator to Activate PIN External Interrupt
+ * 0 := Interrupt OFF
+ * 1 := Interrupt ON
+ *****************************************************************************/
+typedef enum{
+    INTERRUPT_ON, INTERRUPT_OFF
+}PIN_INT;
+
+
+/******************************************************************************
+ * Name: PIN_TRIG
+ * Description: Enumerator to decide the PIN trigger mode
+ * 0 := Active Low      2 := Rising Edge        4 := Both Rising & Falling Edge
+ * 1 := Analog          3 := Falling Edge
+ *****************************************************************************/
+typedef enum{
+    ACTIVE_LOW, ACTIVE_HIGH, FALLING_EDGE, RISING_EDGE, BOTH
+}PIN_TRIG;
+
                                     /* Structs */
 
 /******************************************************************************
@@ -190,6 +204,8 @@ typedef struct{
     PIN_BEHAVIOUR   BEHAVIOUR;
     PIN_DIR         DIRECTION;
     PIN_LOGIC       LOGIC;
+    PIN_INT         INTERRUPT;
+    PIN_TRIG        TRIGGER;
 }PIN_CONFIG;
 
 
@@ -200,5 +216,6 @@ typedef struct{
 
 void GPIO_configurePIN (PIN_CONFIG const *CONFIG_Ptr);
 void GPIO_initClock (uint32_t PORT);
+void GPIO_initInterrupt (uint32_t PORT, uint32_t PIN, uint8_t TRIGGER);
 
 #endif /* GPIO_H_ */
