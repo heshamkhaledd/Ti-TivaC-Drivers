@@ -1,0 +1,1 @@
+"./croutine.obj" "./gpio.obj" "./heap_4.obj" "./list.obj" "./main.obj" "./port.obj" "./portasm.obj" "./queue.obj" "./stream_buffer.obj" "./tasks.obj" "./tm4c123gh6pm_startup_ccs.obj" "./uart0.obj" "../tm4c123gh6pm.cmd" -llibc.a 
