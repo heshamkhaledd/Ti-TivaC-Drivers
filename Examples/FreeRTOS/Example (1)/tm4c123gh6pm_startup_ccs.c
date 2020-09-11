@@ -81,7 +81,7 @@ void (* const g_pfnVectors[])(void) =
     0,                                      // Reserved
     0,                                      // Reserved
     0,                                      // Reserved
-    xPortPendSVHandler,                      // SVCall handler
+    vPortSVCHandler,                      // SVCall handler
     IntDefaultHandler,                      // Debug monitor handler
     0,                                      // Reserved
     xPortPendSVHandler,                      // The PendSV handler

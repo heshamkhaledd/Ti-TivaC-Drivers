@@ -23,24 +23,40 @@ void UART_ISR (void)
 
 void UART_init (void)
 {
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_UART0);
-    SysCtlDelay (5);
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_UART0);    /* Generate Clock to UART0 */
+    SysCtlDelay (5);        /* Required Delay for the SysCtlPeripheralEnable function
+                                Can be replaced with Polling on the SysCtl State */
 
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
-    SysCtlDelay (5);
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);    /* Generate Clock to UART0 */
 
+    SysCtlDelay (5);                                /* Required Delay for the SysCtlPeripheralEnable function
+                                                       Can be replaced with Polling on the SysCtl State */
+
+
+    /* Configure UART Pins as output */
     GPIOPinTypeUART (GPIO_PORTA_BASE,GPIO_PIN_0 | GPIO_PIN_1);
 
+
+    /* Configure The UART0 to work on
+     * 1. 16 MHz Clock
+     * 2. Baud Rate of 9600
+     * 3. Word Length of 8-bit (1 byte)
+     * 4. One stop bit
+     * 5. No Parity
+     * 6. Double speed-mode
+     */
     UARTConfigSetExpClk(UART0_BASE, SysCtlClockGet (), BAUD_RATE, UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE | UART_CONFIG_PAR_NONE);
 
+    /* Re-configure the UART Clock source to the System Clock (Because of the Double speed mode) */
     UARTClockSourceSet(UART0_BASE,UART_CLOCK_SYSTEM);
 
+    /* Enable the FIFO Buffer */
     UARTFIFOEnable (UART0_BASE);
 
-    //UARTFIFOLevelSet(UART0_BASE,UART_FIFO_TX1_8,UART_FIFO_RX1_8);
-
+    /* Enable the UART Interrupt at the Receive Timeout flag*/
     UARTIntEnable (UART0_BASE, UART_INT_RT);
 
+    /* Assign a callback function to act as the ISR to the UART */
     UARTIntRegister (UART0_BASE, UART_ISR);
 
     return;
