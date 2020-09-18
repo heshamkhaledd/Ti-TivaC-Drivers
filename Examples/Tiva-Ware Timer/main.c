@@ -69,8 +69,14 @@ void GPIO_init (void)
 
     GPIOPinTypeGPIOInput  (GPIO_PORTF_BASE, GPIO_PIN_0 | GPIO_PIN_4);   /* Enables the Launchpad 2 Switches */
 
-    GPIOIntTypeSet        (GPIO_PORTF_BASE, GPIO_PIN_0 | GPIO_PIN_4, GPIO_HIGH_LEVEL);
-    GPIOIntEnable         (GPIO_PORTF_BASE,GPIO_INT_PIN_0 | GPIO_INT_PIN_4);
+    GPIOPadConfigSet(GPIO_PORTF_BASE,GPIO_PIN_0,GPIO_STRENGTH_2MA,GPIO_PIN_TYPE_STD_WPU);
+    GPIOPadConfigSet(GPIO_PORTF_BASE,GPIO_PIN_4,GPIO_STRENGTH_2MA,GPIO_PIN_TYPE_STD_WPU);
+
+    GPIOIntTypeSet        (GPIO_PORTF_BASE, GPIO_PIN_0, GPIO_HIGH_LEVEL);
+    GPIOIntTypeSet        (GPIO_PORTF_BASE, GPIO_PIN_4, GPIO_HIGH_LEVEL);
+
+    GPIOIntEnable         (GPIO_PORTF_BASE,GPIO_INT_PIN_0);
+    GPIOIntEnable         (GPIO_PORTF_BASE,GPIO_INT_PIN_0);
 
     GPIOIntRegisterPin    (GPIO_PORTF_BASE,GPIO_PIN_0 ,SWITCH_1st_ISR);    /* Set the callback function for first switch */
     GPIOIntRegisterPin    (GPIO_PORTF_BASE,GPIO_PIN_4 ,SWITCH_2nd_ISR);    /* Set the callback function for second switch */
